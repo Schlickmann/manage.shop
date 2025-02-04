@@ -2,8 +2,45 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Helmet } from "react-helmet-async";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+
+const signInForm = z.object({
+  email: z.string().email(),
+});
+
+type SignInForm = z.infer<typeof signInForm>;
 
 export function SignIn() {
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm<SignInForm>();
+
+  function handleSignIn(data: SignInForm) {
+    try {
+      // Handle sign in logic
+
+      toast.success(
+        "An email has been sent to your inbox with a sign in link.",
+        {
+          action: {
+            label: "Resend email",
+            onClick: () => {
+              // Handle resend email logic
+              handleSignIn(data);
+              toast.success("Email has been resent.");
+            },
+          },
+        },
+      );
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+    }
+  }
+
   return (
     <>
       <Helmet title="Sign In" />
@@ -17,12 +54,12 @@ export function SignIn() {
               Manage your sales through the Partner's dashboard!
             </p>
           </div>
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSubmit(handleSignIn)}>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" />
+              <Input id="email" type="email" required {...register("email")} />
             </div>
-            <Button className="w-full" type="submit">
+            <Button className="w-full" type="submit" disabled={isSubmitting}>
               Sign in
             </Button>
           </form>
